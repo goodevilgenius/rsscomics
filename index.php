@@ -5,17 +5,13 @@ $mem = new Memcache;
 $mem->connect('localhost', 11211);
 
 $feed = "http://feeds.feedburner.com/uclick/$id";
-$rss_xml = $mem->get($feed);
-if (empty($rss_xml)) {
-  $rss_xml = file_get_contents($feed);
-  foreach($http_response_header as $header) {
-    if (strpos($header, "Expires: ") === 0) $exp = ltrim($header, "Expires: ");
-  }
+$rss_xml = file_get_contents($feed);
+foreach($http_response_header as $header) {
+  if (strpos($header, "Expires: ") === 0) $exp = ltrim($header, "Expires: ");
+}
   
-  if (!empty($exp)) {
-    header("Expires: $exp");
-    $mem->set($feed, $rss_xml, 0, time() - strtotime($exp));
-  }
+if (!empty($exp)) {
+  header("Expires: $exp");
 }
 
 $rss = new simplexmlelement($rss_xml);
