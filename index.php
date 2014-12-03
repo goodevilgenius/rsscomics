@@ -12,6 +12,7 @@ foreach($http_response_header as $header) {
   
 if (!empty($exp)) {
   header("Expires: $exp");
+  header("X-Time-Expire: " . time() - strtotime($exp));
 }
 
 $rss = new simplexmlelement($rss_xml);
@@ -19,10 +20,11 @@ $rss = new simplexmlelement($rss_xml);
 $title = preg_replace('@GoComics.com - (.+) by .+@', '\1', $rss->channel->title);
 
 foreach($rss->channel->item as $i) {
-  $html = $mem->get($i->link);
+  $link = strpos($i->link, '//') === 0 ? "http:" . $i->link : $i->link;
+  $html = $mem->get($link);
   if (empty($html)) {
-    $html = file_get_contents($i->link);
-    $mem->set($i->link, $html);
+    $html = file_get_contents($link);
+    $mem->set($link, $html);
   }
 
   $i->title = "$title: " . $i->title;
